@@ -2,7 +2,7 @@
 Connect-AzAccount -Identity
 
 # Retrieve the resource group names from the Azure Automation variable
-$resourceGroupsJson = Get-AutomationVariable -Name 'AutomationAccountRGScope'
+$resourceGroupsJson = Get-AutomationVariable -Name 'AutomationAccountScope'
 
 # Convert the JSON string back into an array of resource group names
 $resourceGroups = $resourceGroupsJson | ConvertFrom-Json
