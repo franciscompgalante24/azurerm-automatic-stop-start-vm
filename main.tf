@@ -1,14 +1,10 @@
 # ---------------------------------------------------------
-# MAIN
+# MAIN.TF
 # ---------------------------------------------------------
 
+# Load Resource Group
 data "azurerm_resource_group" "resource_group" {
   name = var.resource_group_name
-}
-
-data "azurerm_automation_account" "auto_acc" {
-  name                = var.automation_account_name
-  resource_group_name = data.azurerm_resource_group.resource_group.name
 }
 
 # Check next saturday for stopping the virtual machine
@@ -45,23 +41,35 @@ data "local_file" "start_vm" {
   filename = "${path.module}/powershell/start_vm.ps1"
 }
 
+# Create Automation Account
+resource "azurerm_automation_account" "automation_account" {
+    name                = var.automation_account_name
+    location            = var.location != "" ? var.location : data.azurerm_resource_group.resource_group.location
+    resource_group_name = data.azurerm_resource_group.resource_group.name
+    sku_name            = var.sku_name
+    identity {
+        type = "SystemAssigned"
+    }
+    tags = var.tags
+}
+
 # Assign Role to Automation Account for logging in to AZ-Powershell via Managed Identity
-# resource "azurerm_role_assignment" "automation_account_role" {
-#   scope                = data.azurerm_resource_group.resource_group.id
-#   role_definition_name = "Virtual Machine Contributor"
-#   principal_id         = data.azurerm_automation_account.auto_acc.identity[0].principal_id
-#   depends_on           = [data.azurerm_automation_account.auto_acc]
-# }
+resource "azurerm_role_assignment" "automation_account_role" {
+   scope                = data.azurerm_resource_group.resource_group.id
+   role_definition_name = "Virtual Machine Contributor"
+   principal_id         = azurerm_automation_account.automation_account.identity[0].principal_id
+   depends_on           = [azurerm_automation_account.automation_account]
+}
 
 # Resource Group Name in scope -> passed as input to Powershell Script
 resource "azurerm_automation_variable_string" "automation_account_rg_variable" {
   name                    = "StopStartRGScope"
   resource_group_name     = data.azurerm_resource_group.resource_group.name
-  automation_account_name = data.azurerm_automation_account.auto_acc.name
+  automation_account_name = azurerm_automation_account.automation_account.name
   value                   = jsonencode(var.resource_group_name)
   encrypted               = true
 
-  depends_on = [data.azurerm_automation_account.auto_acc]
+  depends_on = [azurerm_automation_account.automation_account]
 }
 
 # Create an Azure Automation Stop VM Runbook -> Powershell script content
@@ -69,7 +77,7 @@ resource "azurerm_automation_runbook" "stop_vm_runbook" {
   name                    = var.stop_vm_runbook_name
   location                = data.azurerm_resource_group.resource_group.location
   resource_group_name     = data.azurerm_resource_group.resource_group.name
-  automation_account_name = data.azurerm_automation_account.auto_acc.name
+  automation_account_name = azurerm_automation_account.automation_account.name
   log_verbose             = "true"
   log_progress            = "true"
   description             = "Runbook for Stopping the Virtual Machine"
@@ -87,7 +95,7 @@ resource "azurerm_automation_runbook" "start_vm_runbook" {
   name                    = var.start_vm_runbook_name
   location                = data.azurerm_resource_group.resource_group.location
   resource_group_name     = data.azurerm_resource_group.resource_group.name
-  automation_account_name = data.azurerm_automation_account.auto_acc.name
+  automation_account_name = azurerm_automation_account.automation_account.name
   log_verbose             = "true"
   log_progress            = "true"
   description             = "Runbook for Starting the Virtual Machine"
@@ -104,7 +112,7 @@ resource "azurerm_automation_runbook" "start_vm_runbook" {
 resource "azurerm_automation_schedule" "stop_vm_schedule" {
   name                    = var.stop_vm_schedule.name
   resource_group_name     = data.azurerm_resource_group.resource_group.name
-  automation_account_name = data.azurerm_automation_account.auto_acc.name
+  automation_account_name = azurerm_automation_account.automation_account.name
   description             = var.stop_vm_schedule.description
   frequency               = var.stop_vm_schedule.frequency
   interval                = var.stop_vm_schedule.interval
@@ -116,7 +124,7 @@ resource "azurerm_automation_schedule" "stop_vm_schedule" {
 resource "azurerm_automation_schedule" "start_vm_schedule" {
   name                    = var.start_vm_schedule.name
   resource_group_name     = data.azurerm_resource_group.resource_group.name
-  automation_account_name = data.azurerm_automation_account.auto_acc.name
+  automation_account_name = azurerm_automation_account.automation_account.name
   description             = var.start_vm_schedule.description
   frequency               = var.start_vm_schedule.frequency
   interval                = var.start_vm_schedule.interval
@@ -128,7 +136,7 @@ resource "azurerm_automation_schedule" "start_vm_schedule" {
 # Associate Automation Account Schedule to Runbook -> Powershell script to Stop VM During Weekends
 resource "azurerm_automation_job_schedule" "automation_schedule_stop_vm" {
   resource_group_name     = data.azurerm_resource_group.resource_group.name
-  automation_account_name = data.azurerm_automation_account.auto_acc.name
+  automation_account_name = azurerm_automation_account.automation_account.name
   schedule_name           = azurerm_automation_schedule.stop_vm_schedule.name
   runbook_name            = azurerm_automation_runbook.stop_vm_runbook.name
 
@@ -139,7 +147,7 @@ resource "azurerm_automation_job_schedule" "automation_schedule_stop_vm" {
 # Associate Automation Account Schedule to Runbook -> Powershell script to Start VM During Weekends
 resource "azurerm_automation_job_schedule" "automation_schedule_start_vm" {
   resource_group_name     = data.azurerm_resource_group.resource_group.name
-  automation_account_name = data.azurerm_automation_account.auto_acc.name
+  automation_account_name = azurerm_automation_account.automation_account.name
   schedule_name           = azurerm_automation_schedule.start_vm_schedule.name
   runbook_name            = azurerm_automation_runbook.start_vm_runbook.name
 
