@@ -46,7 +46,7 @@ resource "azurerm_automation_account" "automation_account" {
     name                = var.automation_account_name
     location            = var.location != "" ? var.location : data.azurerm_resource_group.resource_group.location
     resource_group_name = data.azurerm_resource_group.resource_group.name
-    sku_name            = var.sku_name
+    sku_name            = var.automation_account_sku
     identity {
         type = "SystemAssigned"
     }
