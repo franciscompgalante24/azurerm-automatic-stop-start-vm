@@ -56,9 +56,9 @@ start_vm_schedule = {
 
 In this example, the virtual machine will be stopped during Saturday at 2am and will be running again on Sunday at 22pm.
 
-## Azure services and resources used
-
-- Azure Automation Account
+## References
+- [Automation Account Terraform Module](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/automation_account)
+- [Microsoft Automation Account Overview](https://learn.microsoft.com/en-us/azure/automation/automation-create-standalone-account?tabs=azureportal)
 
 ## Author Information
 Francisco Galante
