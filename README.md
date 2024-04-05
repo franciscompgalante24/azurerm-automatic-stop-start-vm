@@ -17,15 +17,15 @@ Utilizing this Terraform module to manage the schedule for stopping and starting
 ## Example of Module Usage
 ```
 module "automatic_stop_start_vm" {
-  source = "https://github.com/franciscompgalante24/azurerm-automatic-stop-start-vm
-  resource_group_name = var.resource_group_name
-  location = var.location
+  source                  = "https://github.com/franciscompgalante24/azurerm-automatic-stop-start-vm
+  resource_group_name     = var.resource_group_name
+  location                = var.location
   automation_account_name = var.automation_account_name
-  automation_account_sku  = var.automation_account_sku
-  stop_vm_runbook_name = var.stop_vm_runbook_name
-  start_vm_runbook_name = var.start_vm_runbook_name
-  stop_vm_schedule = var.stop_vm_schedule
-  start_vm_schedule = var.start_vm_schedule
+  sku_name                = var.automation_account_sku
+  stop_vm_runbook_name    = var.stop_vm_runbook_name
+  start_vm_runbook_name   = var.start_vm_runbook_name
+  stop_vm_schedule        = var.stop_vm_schedule
+  start_vm_schedule       = var.start_vm_schedule
   tags = var.tags
 }
 ```
