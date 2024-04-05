@@ -34,7 +34,7 @@ The `stop_vm_schedule` and `start_vm_schedule` should be defined like the follow
 
 ```
 stop_vm_schedule = {
-  name        = "automation-schedule-stop-vm-sandbox"
+  name        = "automatic-stop-vm-schedule"
   description = "Run on Pre-Early Saturday"
   frequency   = "Week"
   interval    = 1
@@ -44,7 +44,7 @@ stop_vm_schedule = {
 }
 
 start_vm_schedule = {
-  name        = "automation-schedule-start-vm-sandbox"
+  name        = "automatic-start-vm-schedule"
   description = "Run on Sunday Night"
   frequency   = "Week"
   interval    = 1
