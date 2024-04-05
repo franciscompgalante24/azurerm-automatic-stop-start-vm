@@ -23,6 +23,11 @@ variable "automation_account_name" {
   type        = string
 }
 
+variable "automation_account_sku" {
+  description = "Sku of the Automation Account"
+  type        = string
+}
+
 variable "stop_vm_runbook_name" {
   description = "Name of the Automation Runbook that stops the vm"
   type        = string
