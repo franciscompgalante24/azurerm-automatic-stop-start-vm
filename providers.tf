@@ -11,3 +11,8 @@ terraform {
     }
   }
 }
+
+# Configure Azure Provider -> comment if used on a project with the provider configured already
+provider "azurerm" {
+  features {}
+}
