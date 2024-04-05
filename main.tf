@@ -63,7 +63,7 @@ resource "azurerm_role_assignment" "automation_account_role" {
 
 # Resource Group Name in scope -> passed as input to Powershell Script
 resource "azurerm_automation_variable_string" "automation_account_rg_variable" {
-  name                    = "StopStartRGScope"
+  name                    = "AutomationAccountScope"
   resource_group_name     = data.azurerm_resource_group.resource_group.name
   automation_account_name = azurerm_automation_account.automation_account.name
   value                   = jsonencode(var.resource_group_name)
